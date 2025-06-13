@@ -61,7 +61,7 @@ class _PageLoginState extends State<PageLogin> {
                   onPressed: () {
                     Navigator.push(context,
                     MaterialPageRoute(
-                      builder: (context) => Reset(),
+                      builder: (context) => ResetPasswordForm(),
                     ));
                   },
                   child: const Text('Reset Password'),
