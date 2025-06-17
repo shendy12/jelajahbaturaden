@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 void main() {
   runApp(MyApp());
@@ -29,13 +27,11 @@ class PengajuanFormPage extends StatefulWidget {
 }
 
 class _PengajuanFormPageState extends State<PengajuanFormPage> {
+  final TextEditingController _idTempatController = TextEditingController();
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
   final TextEditingController _alamatController = TextEditingController();
   String? _selectedKategori;
-
-  final ImagePicker _picker = ImagePicker();
-  XFile? _selectedImage;
 
   final List<String> _kategoriList = [
     'Wisata Alam',
@@ -44,17 +40,14 @@ class _PengajuanFormPageState extends State<PengajuanFormPage> {
     'Lainnya',
   ];
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImage = image;
-      });
-    }
+  String get imageUrl {
+    final id =
+        _idTempatController.text.isEmpty ? "default" : _idTempatController.text;
+    return 'https://picsum.photos/seed/$id/600/400';
   }
 
   void _submitForm() {
-    if (_selectedImage == null ||
+    if (_idTempatController.text.isEmpty ||
         _namaController.text.isEmpty ||
         _deskripsiController.text.isEmpty ||
         _alamatController.text.isEmpty ||
@@ -65,16 +58,26 @@ class _PengajuanFormPageState extends State<PengajuanFormPage> {
       return;
     }
 
-    // Contoh log output
+    print("ID Tempat: ${_idTempatController.text}");
     print("Nama: ${_namaController.text}");
     print("Deskripsi: ${_deskripsiController.text}");
     print("Alamat: ${_alamatController.text}");
     print("Kategori: $_selectedKategori");
-    print("Gambar path: ${_selectedImage!.path}");
+    print("Gambar URL: $imageUrl");
 
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text("Pengajuan berhasil dikirim")));
+  }
+
+  void _clearForm() {
+    _idTempatController.clear();
+    _namaController.clear();
+    _deskripsiController.clear();
+    _alamatController.clear();
+    setState(() {
+      _selectedKategori = null;
+    });
   }
 
   @override
@@ -82,39 +85,44 @@ class _PengajuanFormPageState extends State<PengajuanFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Pengajuan Tempat"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {}, // bisa diisi Navigator.pop(context) jika perlu
-        ),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () {}),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(16),
+              // Gambar dari Picsum
+              Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(child: Text("Gagal memuat gambar"));
+                    },
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Center(child: CircularProgressIndicator());
+                    },
                   ),
-                  child:
-                      _selectedImage != null
-                          ? ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              File(_selectedImage!.path),
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                          )
-                          : Center(child: Text("Upload Image")),
                 ),
               ),
               SizedBox(height: 16),
+              TextField(
+                controller: _idTempatController,
+                decoration: InputDecoration(labelText: "ID Tempat"),
+                onChanged: (_) => setState(() {}),
+              ),
+              SizedBox(height: 12),
               TextField(
                 controller: _namaController,
                 decoration: InputDecoration(labelText: "Nama Tempat"),
@@ -148,15 +156,34 @@ class _PengajuanFormPageState extends State<PengajuanFormPage> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text("Request"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: StadiumBorder(),
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _submitForm,
+                      child: Text("Posting"),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: StadiumBorder(),
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _clearForm,
+                      child: Text("Clear"),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: StadiumBorder(),
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
