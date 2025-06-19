@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'history.dart'; // pastikan file ini sudah ada
 
 class PencarianPage extends StatelessWidget {
   final List<Map<String, dynamic>> wisataList = List.generate(10, (index) {
@@ -14,47 +15,55 @@ class PencarianPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pencarian", style: TextStyle(color: Colors.black)),
+        title: const Text("Pencarian", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
         elevation: 0,
+        automaticallyImplyLeading: false, // ini untuk hilangkan tombol back
       ),
       body: Column(
         children: [
+          // SearchBar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              readOnly: false,
-              decoration: InputDecoration(
-                hintText: "Search",
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[200],
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                );
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    hintText: "Search",
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
-              onTap: () {},
             ),
           ),
 
+          // List Wisata
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: wisataList.length,
               itemBuilder: (context, index) {
                 final item = wisataList[index];
                 return Container(
-                  margin: EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 4,
@@ -63,7 +72,7 @@ class PencarianPage extends StatelessWidget {
                     ],
                   ),
                   child: ListTile(
-                    contentPadding: EdgeInsets.all(8),
+                    contentPadding: const EdgeInsets.all(8),
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
@@ -76,7 +85,10 @@ class PencarianPage extends StatelessWidget {
                             width: 70,
                             height: 70,
                             color: Colors.grey[300],
-                            child: Icon(Icons.broken_image, color: Colors.grey),
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                            ),
                           );
                         },
                       ),
@@ -86,8 +98,8 @@ class PencarianPage extends StatelessWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.star, color: Colors.amber),
-                        SizedBox(width: 4),
+                        const Icon(Icons.star, color: Colors.amber),
+                        const SizedBox(width: 4),
                         Text(item['rating'].toString()),
                       ],
                     ),
