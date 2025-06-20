@@ -46,7 +46,7 @@ class _ProfilState extends State<Profil> {
                   onTap:
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Favorit()),
+                        MaterialPageRoute(builder: (context) => FavoritePage()),
                       ),
                 ),
                 MenuProfil(
@@ -55,7 +55,7 @@ class _ProfilState extends State<Profil> {
                   onTap:
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Favorit()),
+                        MaterialPageRoute(builder: (context) => FavoritePage()),
                       ),
                 ),
                 MenuProfil(
@@ -75,24 +75,6 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  void panggilhalaman(int index) {
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Favorit()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Favorit()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Profil()),
-      );
-    }
-  }
 }
 
 class MenuProfil extends StatelessWidget {
