@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:jelajahbaturaden/screen/halamanMenulisReview.dart';
 import 'package:jelajahbaturaden/screen/halamanutama.dart' as home;
 import 'package:jelajahbaturaden/screen/profil.dart' as profil;
 import 'package:jelajahbaturaden/screen/pencarian.dart' as cari;
 
 void main() {
-  runApp(MaterialApp(home: MainPage(), debugShowCheckedModeBanner: false));
+  runApp(MaterialApp(home: ReviewPage(), debugShowCheckedModeBanner: false));
 }
 
 class MainPage extends StatefulWidget {
@@ -29,21 +30,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFF00879B),
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Pencarian'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
-    );
+    return Scaffold(body: _pages[_selectedIndex]);
   }
 }
