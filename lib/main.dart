@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jelajahbaturaden/screen/halamanMenulisReview.dart';
 import 'package:jelajahbaturaden/screen/halamanutama.dart' as home;
 import 'package:jelajahbaturaden/screen/profil.dart' as profil;
 import 'package:jelajahbaturaden/screen/pencarian.dart' as cari;
 
 void main() {
-  runApp(MaterialApp(home: ReviewPage(), debugShowCheckedModeBanner: false));
+  runApp(MaterialApp(home: MainPage(), debugShowCheckedModeBanner: false));
 }
 
 class MainPage extends StatefulWidget {
