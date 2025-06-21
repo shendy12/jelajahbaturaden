@@ -1,193 +1,160 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:jelajahbaturaden/konstanta.dart';
+import 'package:jelajahbaturaden/pengajuan/detailpengajuan.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class Pengajuan {
+  final int id;
+  final String namawisata;
+  final String namakategori;
+  final String foto;
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Form Pengajuan Tempat',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(),
-        ),
-      ),
-      home: PengajuanFormPage(),
+  Pengajuan({
+    required this.id,
+    required this.namawisata,
+    required this.namakategori,
+    required this.foto,
+  });
+
+  factory Pengajuan.fromJson(Map<String, dynamic> json) {
+    return Pengajuan(
+      id: int.parse(json['idpengajuan']),
+      namawisata: json['namawisata'],
+      namakategori: json['namakategori'],
+      foto: json['foto'],
     );
   }
 }
 
-class PengajuanFormPage extends StatefulWidget {
+class Pengajuanadmin extends StatefulWidget {
+  const Pengajuanadmin({Key? key}) : super(key: key);
+
   @override
-  _PengajuanFormPageState createState() => _PengajuanFormPageState();
+  State<Pengajuanadmin> createState() => _PengajuanadminState();
 }
 
-class _PengajuanFormPageState extends State<PengajuanFormPage> {
-  final TextEditingController _idTempatController = TextEditingController();
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _deskripsiController = TextEditingController();
-  final TextEditingController _alamatController = TextEditingController();
-  String? _selectedKategori;
+class _PengajuanadminState extends State<Pengajuanadmin> {
+  List<Pengajuan> pengajuanList = [];
 
-  final List<String> _kategoriList = [
-    'Wisata Alam',
-    'Budaya',
-    'Kuliner',
-    'Lainnya',
-  ];
-
-  String get imageUrl {
-    final id =
-        _idTempatController.text.isEmpty ? "default" : _idTempatController.text;
-    return 'https://picsum.photos/seed/$id/600/400';
+  @override
+  void initState() {
+    super.initState();
+    fetchPengajuan();
   }
 
-  void _submitForm() {
-    if (_idTempatController.text.isEmpty ||
-        _namaController.text.isEmpty ||
-        _deskripsiController.text.isEmpty ||
-        _alamatController.text.isEmpty ||
-        _selectedKategori == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Mohon lengkapi semua data")));
-      return;
+  Future<void> fetchPengajuan() async {
+    final response = await http.get(
+      Uri.parse(baseUrl), 
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        pengajuanList = data.map((item) => Pengajuan.fromJson(item)).toList();
+      });
+    } else {
+      print('Gagal mengambil data: ${response.statusCode}');
     }
-
-    print("ID Tempat: ${_idTempatController.text}");
-    print("Nama: ${_namaController.text}");
-    print("Deskripsi: ${_deskripsiController.text}");
-    print("Alamat: ${_alamatController.text}");
-    print("Kategori: $_selectedKategori");
-    print("Gambar URL: $imageUrl");
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Pengajuan berhasil dikirim")));
-  }
-
-  void _clearForm() {
-    _idTempatController.clear();
-    _namaController.clear();
-    _deskripsiController.clear();
-    _alamatController.clear();
-    setState(() {
-      _selectedKategori = null;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        title: Text("Pengajuan Tempat"),
-        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () {}),
+        title: const Text('Request Wisata'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        centerTitle: true,
+        leading: const BackButton(),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Gambar dari Picsum
-              Container(
-                width: double.infinity,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(child: Text("Gagal memuat gambar"));
-                    },
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Center(child: CircularProgressIndicator());
-                    },
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _idTempatController,
-                decoration: InputDecoration(labelText: "ID Tempat"),
-                onChanged: (_) => setState(() {}),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: _namaController,
-                decoration: InputDecoration(labelText: "Nama Tempat"),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: _deskripsiController,
-                maxLines: 2,
-                decoration: InputDecoration(labelText: "Deskripsi"),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: _alamatController,
-                decoration: InputDecoration(labelText: "Alamat"),
-              ),
-              SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedKategori,
-                hint: Text("Kategori"),
-                items:
-                    _kategoriList.map((String kategori) {
-                      return DropdownMenuItem<String>(
-                        value: kategori,
-                        child: Text(kategori),
-                      );
-                    }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedKategori = value;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _submitForm,
-                      child: Text("Posting"),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: StadiumBorder(),
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _clearForm,
-                      child: Text("Clear"),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: StadiumBorder(),
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              onChanged: (value) {
+                // Tambahkan pencarian jika perlu
+              },
+            ),
           ),
-        ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: pengajuanList.length,
+              itemBuilder: (context, index) {
+                final item = pengajuanList[index];
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.memory(
+                          base64Decode(item.foto),
+                          width: 100,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.namawisata,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item.namakategori,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailPengajuanPage(id: item.id),
+                            ),
+                          );
+                        },
+                        child: const Text("Detail"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
