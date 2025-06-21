@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:jelajahbaturaden/konstanta.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   Future<List<WisataFavorite>> fetchFavorites() async {
-    final response = await http.get(Uri.parse('http://yourapi.com/api/favorite/getUserFavorites'));
+    final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
