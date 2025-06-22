@@ -39,7 +39,6 @@ class EditPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Gambar dari URL
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),

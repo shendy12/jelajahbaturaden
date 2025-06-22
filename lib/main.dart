@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jelajahbaturaden/screen/halamanMenulisReview.dart';
 import 'package:jelajahbaturaden/screen/halamanutama.dart' as home;
+import 'package:jelajahbaturaden/screen/listadmin.dart';
 import 'package:jelajahbaturaden/screen/profil.dart' as profil;
 import 'package:jelajahbaturaden/screen/pencarian.dart' as cari;
 
 void main() {
-  runApp(MaterialApp(home: ReviewPage(), debugShowCheckedModeBanner: false));
+  runApp(
+    MaterialApp(home: WisataListPage(), debugShowCheckedModeBanner: false),
+  );
 }
 
 class MainPage extends StatefulWidget {
@@ -30,6 +32,21 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _pages[_selectedIndex]);
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+        ],
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+      ),
+    );
   }
 }
