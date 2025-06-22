@@ -1,112 +1,111 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'halaman_edit.dart'; // pastikan file halaman_edit.dart ada di folder lib
+import 'package:http/http.dart' as http;
 
-void main() => runApp(RequestWisataApp());
-
-class RequestWisataApp extends StatelessWidget {
+class WisataListPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: RequestWisataPage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
+  _WisataListPageState createState() => _WisataListPageState();
 }
 
-class RequestWisataPage extends StatelessWidget {
-  final List<Map<String, String>> wisataList = List.generate(
-    6,
-    (index) => {
-      'nama': 'wisata lain',
-      'kategori': 'Baturaden',
-      'gambar':
-          'https://images.unsplash.com/photo-1506744038136-46273834b3fb', // Gambar diganti karena yang sebelumnya 404
-    },
-  );
+class _WisataListPageState extends State<WisataListPage> {
+  List<dynamic> wisataList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWisata();
+  }
+
+  Future<void> fetchWisata() async {
+    final response = await http.get(
+      Uri.parse('http://localhost:8080/wisata'),
+    ); // Ganti dengan IP server kamu
+
+    if (response.statusCode == 200) {
+      setState(() {
+        wisataList = json.decode(response.body);
+      });
+    } else {
+      throw Exception('Gagal mengambil data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(color: Colors.black),
-        title: Text('Request Wisata', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      backgroundColor: Colors.grey[100],
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: Icon(Icons.search),
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: wisataList.length,
-              itemBuilder: (context, index) {
-                final wisata = wisataList[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+      appBar: AppBar(title: Text('Request Wisata')),
+      body:
+          wisataList.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                itemCount: wisataList.length,
+                itemBuilder: (context, index) {
+                  final wisata = wisataList[index];
+                  final imageBytes = base64Decode(wisata['foto']);
+
+                  return Card(
+                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: ListTile(
-                      contentPadding: EdgeInsets.all(10),
                       leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          wisata['gambar']!,
-                          width: 60,
-                          height: 60,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          imageBytes,
+                          width: 70,
+                          height: 70,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      title: Text(
-                        wisata['nama']!,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(wisata['kategori']!),
+                      title: Text(wisata['namawisata']),
+                      subtitle: Text(wisata['namakategori']),
                       trailing: ElevatedButton(
+                        child: Text('Detail'),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const EditPage(),
+                              builder: (_) => DetailWisataPage(data: wisata),
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: Text('Detail'),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
+    );
+  }
+}
+
+class DetailWisataPage extends StatelessWidget {
+  final dynamic data;
+
+  DetailWisataPage({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageBytes = base64Decode(data['foto']);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(data['namawisata'])),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.memory(imageBytes),
+            SizedBox(height: 16),
+            Text(
+              'Kategori: ${data['namakategori']}',
+              style: TextStyle(fontSize: 18),
             ),
-          ),
-        ],
+            SizedBox(height: 8),
+            Text('Alamat: ${data['alamat']}', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 8),
+            Text('Deskripsi:', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 4),
+            Text(data['deskripsi']),
+          ],
+        ),
       ),
     );
   }
