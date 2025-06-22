@@ -18,7 +18,7 @@ class PencarianPage extends StatelessWidget {
         title: const Text("Pencarian", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false, // ini untuk hilangkan tombol back
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [

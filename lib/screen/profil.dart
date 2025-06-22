@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jelajahbaturaden/login/login.dart';
 import 'package:jelajahbaturaden/screen/favorit.dart';
+import 'package:jelajahbaturaden/pengajuan/postinguser.dart'; // tambahkan import ini
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -55,14 +56,16 @@ class _ProfilState extends State<Profil> {
                   onTap:
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => FavoritePage()),
+                        MaterialPageRoute(
+                          builder: (context) => PengajuanFormPage(),
+                        ), // diarahkan ke postinguser.dart
                       ),
                 ),
                 MenuProfil(
                   icon: Icons.logout,
                   label: 'Logout',
                   onTap:
-                      () => Navigator.push(
+                      () => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => PageLogin()),
                       ),
@@ -74,7 +77,6 @@ class _ProfilState extends State<Profil> {
       ),
     );
   }
-
 }
 
 class MenuProfil extends StatelessWidget {
