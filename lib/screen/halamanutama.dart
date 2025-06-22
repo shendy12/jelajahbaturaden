@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'detail_wisata.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -19,10 +20,12 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   ) {
     return {
       'id': index,
-      'nama': 'Wisata Lain',
-      'lokasi': 'Seelisburg',
+      'nama': 'Wisata ${String.fromCharCode(65 + index)}', // A, B, C...
+      'lokasi': 'Baturaden',
       'gambar': 'https://picsum.photos/id/${100 + index}/200/150',
       'rating': 4.5,
+      'deskripsi':
+          'Deskripsi lokasi Wisata ${String.fromCharCode(65 + index)}.',
     };
   });
 
@@ -44,7 +47,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             SizedBox(height: 12),
 
             // Carousel
-            Container(
+            SizedBox(
               height: 180,
               child: PageView.builder(
                 itemCount: carouselImages.length,
@@ -66,11 +69,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             ),
 
             SizedBox(height: 20),
-
             Text("Rekomendasi", style: TextStyle(fontWeight: FontWeight.w600)),
             SizedBox(height: 10),
 
-            // Kategori Chip
+            // Kategori
             Wrap(
               spacing: 10,
               children:
@@ -90,72 +92,80 @@ class _HalamanUtamaState extends State<HalamanUtama> {
               children:
                   rekomendasiWisata.map((item) {
                     final bool isFavorit = favoritSet.contains(item['id']);
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailWisataPage(data: item),
                           ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              bottomLeft: Radius.circular(16),
+                        );
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
                             ),
-                            child: Image.network(
-                              item['gambar'],
-                              width: 110,
-                              height: 100,
-                              fit: BoxFit.cover,
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                bottomLeft: Radius.circular(16),
+                              ),
+                              child: Image.network(
+                                item['gambar'],
+                                width: 110,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item['nama'],
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    item['lokasi'],
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
-                                            size: 18,
-                                          ),
-                                          SizedBox(width: 4),
-                                          Text(item['rating'].toString()),
-                                        ],
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['nama'],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
-                                      IconButton(
-                                        icon: Icon(
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      item['lokasi'],
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                              size: 18,
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(item['rating'].toString()),
+                                          ],
+                                        ),
+                                        Icon(
                                           isFavorit
                                               ? Icons.favorite
                                               : Icons.favorite_border,
@@ -164,23 +174,14 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                                                   ? Colors.red
                                                   : Colors.black,
                                         ),
-                                        onPressed: () {
-                                          setState(() {
-                                            if (isFavorit) {
-                                              favoritSet.remove(item['id']);
-                                            } else {
-                                              favoritSet.add(item['id']);
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
