@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:jelajahbaturaden/pengajuan/postingadmin.dart';
+=======
+>>>>>>> f8104e76482add3765b98299409c6e0672ff6208
 import 'package:jelajahbaturaden/screen/halamanutama.dart' as home;
+import 'package:jelajahbaturaden/screen/listadmin.dart';
 import 'package:jelajahbaturaden/screen/profil.dart' as profil;
 import 'package:jelajahbaturaden/screen/pencarian.dart' as cari;
 
 void main() {
   runApp(
+<<<<<<< HEAD
     MaterialApp(home: FormPostingWisata(), debugShowCheckedModeBanner: false),
+=======
+    MaterialApp(home: WisataListPage(), debugShowCheckedModeBanner: false),
+>>>>>>> f8104e76482add3765b98299409c6e0672ff6208
   );
 }
 
