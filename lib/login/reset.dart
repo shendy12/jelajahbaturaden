@@ -19,26 +19,34 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
     setState(() {
       isLoading = true;
     });
-    var url = Uri.parse('${baseUrl}reset/reset');
+
+    var url = Uri.parse("${baseUrl}pengguna/reset"); // Pastikan endpoint benar
     try {
       var response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'email': emailController.text,
-          'password_baru': passwordBaruController.text,
+          'email': emailController.text.trim(),
+          'new_password': passwordBaruController.text.trim(), // ← DISESUAIKAN
         }),
       );
+
       var result = json.decode(response.body);
 
-      if (response.statusCode == 200 && result['status'] == 'success') {
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Password berhasil direset! Silakan login.')),
         );
         _formKey.currentState?.reset();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Reset password gagal')),
+          SnackBar(
+            content: Text(
+              result['message'] ??
+                  result['messages']['error'] ??
+                  'Reset password gagal',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -90,7 +98,8 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    validator: (value) => value == null || value.isEmpty ? 'Email wajib diisi' : null,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Email wajib diisi' : null,
                   ),
                   SizedBox(height: 16),
                   // Password Baru
@@ -119,7 +128,8 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                         },
                       ),
                     ),
-                    validator: (value) => value == null || value.isEmpty ? 'Password baru wajib diisi' : null,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Password baru wajib diisi' : null,
                   ),
                   SizedBox(height: 28),
                   SizedBox(
@@ -145,7 +155,10 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
                           ? SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF13A7B1)),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF13A7B1),
+                              ),
                             )
                           : Text(
                               'Reset Password',

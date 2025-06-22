@@ -3,26 +3,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '/konstanta.dart';
 
-class PenggunaForm extends StatefulWidget {
+class Addadmin extends StatefulWidget {
   @override
-  _PenggunaFormState createState() => _PenggunaFormState();
+  _AddadminState createState() => _AddadminState();
 }
 
-class _PenggunaFormState extends State<PenggunaForm> {
+class _AddadminState extends State<Addadmin> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    usernameController.dispose();
-    super.dispose();
-  }
 
   Future<void> addPengguna() async {
     var url = Uri.parse('${baseUrl}pengguna/add');
@@ -33,6 +24,7 @@ class _PenggunaFormState extends State<PenggunaForm> {
         'email': emailController.text,
         'password': passwordController.text,
         'username': usernameController.text,
+        'role': 'admin',
       }),
     );
 
@@ -48,7 +40,7 @@ class _PenggunaFormState extends State<PenggunaForm> {
         if (errorData.isNotEmpty) {
           errorMessage = errorData.values.join('\n');
         }
-      } catch (e) {}
+      } catch (_) {}
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
@@ -102,7 +94,6 @@ class _PenggunaFormState extends State<PenggunaForm> {
                         child: Column(
                           children: [
                             SizedBox(height: 24),
-                            // Username
                             TextFormField(
                               controller: usernameController,
                               style: TextStyle(color: Colors.black),
@@ -120,7 +111,6 @@ class _PenggunaFormState extends State<PenggunaForm> {
                                   value == null || value.isEmpty ? 'Username wajib diisi' : null,
                             ),
                             SizedBox(height: 16),
-                            // Email
                             TextFormField(
                               controller: emailController,
                               style: TextStyle(color: Colors.black),
@@ -138,7 +128,6 @@ class _PenggunaFormState extends State<PenggunaForm> {
                                   value == null || value.isEmpty ? 'Email wajib diisi' : null,
                             ),
                             SizedBox(height: 16),
-                            // Password
                             TextFormField(
                               controller: passwordController,
                               obscureText: true,
@@ -163,7 +152,6 @@ class _PenggunaFormState extends State<PenggunaForm> {
                               },
                             ),
                             SizedBox(height: 16),
-                            // Konfirmasi Password
                             TextFormField(
                               controller: confirmPasswordController,
                               obscureText: true,
@@ -188,7 +176,6 @@ class _PenggunaFormState extends State<PenggunaForm> {
                               },
                             ),
                             SizedBox(height: 28),
-                            // Tombol Sign Up
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
