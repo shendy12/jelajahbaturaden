@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:jelajahbaturaden/screen/halamanutama.dart' as home;
 import 'package:jelajahbaturaden/screen/profil.dart' as profil;
 import 'package:jelajahbaturaden/screen/pencarian.dart' as cari;
+import 'package:jelajahbaturaden/login/login.dart';
+import 'package:jelajahbaturaden/login/addpengguna.dart';
 
 void main() {
-  runApp(MaterialApp(home: MainPage(), debugShowCheckedModeBanner: false));
+  runApp(MaterialApp(home: PageLogin(), debugShowCheckedModeBanner: false));
 }
 
 class MainPage extends StatefulWidget {
