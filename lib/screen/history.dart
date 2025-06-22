@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
 
-  // Dummy list riwayat pencarian (kosong untuk simulasi)
   final List<String> historyList = const [];
 
   @override
@@ -20,7 +19,6 @@ class HistoryPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
