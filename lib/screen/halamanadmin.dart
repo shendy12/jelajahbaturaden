@@ -1,5 +1,8 @@
 
 import 'package:flutter/material.dart';
+import 'package:jelajahbaturaden/pengajuan/pengajuanadmin.dart';
+import 'package:jelajahbaturaden/pengajuan/postingadmin.dart';
+import 'package:jelajahbaturaden/screen/editdeleteadmin.dart';
 import 'package:provider/provider.dart'; 
 import '../login/addadmin.dart';
 import 'package:jelajahbaturaden/login/login.dart';
@@ -105,7 +108,7 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) =>Addadmin())
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => FormPostingWisata())
 
                     );                  },
                   child: const Text('Posting / Manajemen Konten', style: TextStyle(fontSize: 16, color: Colors.white)),
@@ -123,7 +126,7 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) =>Addadmin())
+                  Navigator.push(context, MaterialPageRoute(builder: (_) =>EditDeleteAdminPage())
                     );
                   },
                   child: const Text('Edit Data Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
@@ -141,7 +144,7 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) =>Addadmin()));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => Pengajuanadmin()));
 
                   },
                   child: const Text('Kelola Request Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
