@@ -4,8 +4,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:jelajahbaturaden/konstanta.dart';
 
-// Ganti sesuai baseUrl API kamu
-
 class ReviewPage extends StatefulWidget {
   final int idWisata;
   final String namaWisata;
@@ -26,6 +24,7 @@ class _ReviewPageState extends State<ReviewPage> {
   double _currentRating = 0;
   final TextEditingController _ulasanController = TextEditingController();
   List<dynamic> _reviews = [];
+  bool _isLoading = false; // Untuk menampilkan indikator loading
 
   @override
   void initState() {
@@ -33,54 +32,89 @@ class _ReviewPageState extends State<ReviewPage> {
     _fetchUlasan();
   }
 
+  // Mengambil ulasan dari API
   Future<void> _fetchUlasan() async {
-    final response = await http.get(
-      Uri.parse('${baseUrl}review/${widget.idWisata}'),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (response.statusCode == 200) {
+    try {
+      final response = await http.get(
+        Uri.parse('${baseUrl}review/${widget.idWisata}'),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _reviews = json.decode(response.body);
+        });
+      } else {
+        print('Gagal mengambil ulasan');
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
       setState(() {
-        _reviews = json.decode(response.body);
+        _isLoading = false;
       });
-    } else {
-      print('Gagal mengambil ulasan');
     }
   }
 
+  // Mengirim ulasan baru
   Future<void> _kirimUlasan() async {
     if (_currentRating == 0 || _ulasanController.text.trim().isEmpty) return;
 
-    final response = await http.post(
-      Uri.parse('${baseUrl}review'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'idwisata': widget.idWisata,
-        'review': _ulasanController.text.trim(),
-        'rating': _currentRating.toInt(),
-      }),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (response.statusCode == 201) {
+    try {
+      final response = await http.post(
+        Uri.parse('${baseUrl}review'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'idwisata': widget.idWisata,
+          'review': _ulasanController.text.trim(),
+          'rating': _currentRating.toInt(), // Pastikan rating adalah integer
+          'id_pengguna': widget.userId,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        setState(() {
+          _currentRating = 0;
+          _ulasanController.clear();
+        });
+        _fetchUlasan();
+      } else {
+        print('Gagal mengirim ulasan');
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
       setState(() {
-        _currentRating = 0;
-        _ulasanController.clear();
+        _isLoading = false;
       });
-      _fetchUlasan();
-    } else {
-      print('Gagal mengirim ulasan');
     }
   }
 
+  // Menghapus ulasan
   Future<void> _hapusUlasan(int idReview) async {
-    final response = await http.delete(Uri.parse('${baseUrl}review/$idReview'));
+    try {
+      final response = await http.delete(
+        Uri.parse('${baseUrl}review/$idReview'),
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 204) {
-      _fetchUlasan();
-    } else {
-      print('Gagal menghapus ulasan');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        _fetchUlasan();
+      } else {
+        print('Gagal menghapus ulasan');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
+  // Menampilkan card untuk setiap ulasan
   Widget _buildUlasanCard(Map review) {
     final bool isMine = review['id_pengguna'] == widget.userId;
 
@@ -179,7 +213,7 @@ class _ReviewPageState extends State<ReviewPage> {
             TextField(
               controller: _ulasanController,
               decoration: InputDecoration(
-                hintText: 'tulis ulasan',
+                hintText: 'Tulis ulasan...',
                 contentPadding: const EdgeInsets.all(12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -194,26 +228,29 @@ class _ReviewPageState extends State<ReviewPage> {
               onPressed: _kirimUlasan,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('beri ulasan', style: TextStyle(fontSize: 16)),
+              child: const Text('Beri ulasan', style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 12),
             const Divider(),
-            Expanded(
-              child:
-                  _reviews.isEmpty
-                      ? const Center(child: Text('Belum ada ulasan.'))
-                      : ListView.builder(
-                        itemCount: _reviews.length,
-                        itemBuilder:
-                            (context, index) =>
-                                _buildUlasanCard(_reviews[index]),
-                      ),
-            ),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Expanded(
+                  child:
+                      _reviews.isEmpty
+                          ? const Center(child: Text('Belum ada ulasan.'))
+                          : ListView.builder(
+                            itemCount: _reviews.length,
+                            itemBuilder:
+                                (context, index) =>
+                                    _buildUlasanCard(_reviews[index]),
+                          ),
+                ),
           ],
         ),
       ),

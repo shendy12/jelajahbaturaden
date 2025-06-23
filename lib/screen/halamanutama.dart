@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart'; 
-import 'package:jelajahbaturaden/konstanta.dart'; 
-import 'profil.dart' as profil; 
-import 'pencarian.dart' as cari; 
-import '../model/user_session.dart'; 
+import 'package:jelajahbaturaden/konstanta.dart';
+import 'profil.dart' as profil;
+import 'pencarian.dart' as cari;
+import 'detail_wisata.dart';
+import 'package:provider/provider.dart';
+import '../model/user_session.dart';
 
 class HalamanUtama extends StatefulWidget {
-
-
   const HalamanUtama({super.key});
 
   @override
@@ -24,11 +23,8 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   Set<int> favoriteIds = {};
   final PageController _pageController = PageController(viewportFraction: 0.9);
 
-  int userId = 0; 
-  String username = 'Pengguna'; 
-
-  bool _isLoadingKategori = true; 
-  bool _isLoadingWisata = true; 
+  int userId = 0;
+  String username = 'Pengguna';
 
   @override
   void initState() {
@@ -40,70 +36,42 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           userId = userSession.userId ?? 0;
           username = userSession.username ?? 'Pengguna';
         });
+        fetchKategori();
+        fetchWisata();
       }
-      _initiateDataFetching();
     });
-  }
-
-  Future<void> _initiateDataFetching() async {
-    if (mounted) {
-      setState(() {
-        _isLoadingKategori = true;
-        _isLoadingWisata = true;
-      });
-    }
-
-    await Future.wait([
-      fetchKategori(),
-      fetchWisata(),
-    ]);
-
-    if (mounted) {
-      setState(() {
-        _isLoadingKategori = false;
-        _isLoadingWisata = false;
-      });
-    }
   }
 
   Future<void> fetchKategori() async {
     final uri = Uri.parse('$baseUrl/kategori');
-    try {
-      final response = await http.get(uri);
-      if (response.statusCode == 200) {
-        if (mounted) {
-          final decoded = json.decode(response.body);
-          setState(() => kategoriList = decoded);
-        }
-        print("Kategori Diterima: $kategoriList"); 
-      } else {
-        print('Gagal memuat kategori: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching kategori: $e');
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (!mounted) return;
+      setState(() => kategoriList = decoded);
     }
   }
 
   Future<void> fetchWisata({int? kategoriId}) async {
-    final uri = kategoriId == null
-        ? Uri.parse('$baseUrl/wisata?idpengguna=$userId')
-        : Uri.parse('$baseUrl/wisata/kategori/$kategoriId?idpengguna=$userId');
+    final uri =
+        kategoriId == null
+            ? Uri.parse('$baseUrl/wisata?idpengguna=$userId')
+            : Uri.parse(
+              '$baseUrl/wisata/kategori/$kategoriId?idpengguna=$userId',
+            );
 
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
-        if (mounted) {
-          final decoded = json.decode(response.body);
-          print("Data Wisata Diterima: $decoded");
-
-          setState(() {
-            wisataList = decoded; 
-            favoriteIds = {
-              for (var w in decoded)
-                if (w['isFavorit'] == 1) w['idwisata'],
-            };
-          });
-        }
+        final decoded = json.decode(response.body);
+        if (!mounted) return;
+        setState(() {
+          wisataList = decoded;
+          favoriteIds = {
+            for (var w in decoded)
+              if (w['isFavorit'] == 1) w['idwisata'],
+          };
+        });
       } else {
         print('Failed to load wisata: ${response.statusCode}');
       }
@@ -113,54 +81,12 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   }
 
   Future<void> toggleFavorit(int idwisata) async {
-    if (mounted) {
-      setState(() {
-        favoriteIds.contains(idwisata)
-            ? favoriteIds.remove(idwisata)
-            : favoriteIds.add(idwisata);
-      });
-    }
-
-    final uri = Uri.parse('$baseUrl/wisata/toggle-favorit');
-    try {
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'idpengguna': userId, 
-          'idwisata': idwisata,
-          'action': favoriteIds.contains(idwisata) ? 'add' : 'remove',
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        print('Gagal memperbarui favorit di server: ${response.statusCode}');
-        if (mounted) {
-          setState(() {
-            favoriteIds.contains(idwisata)
-                ? favoriteIds.remove(idwisata)
-                : favoriteIds.add(idwisata);
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal memperbarui favorit.'), backgroundColor: Colors.red),
-          );
-        }
-      } else {
-        print('Status favorit berhasil diperbarui di server.');
-      }
-    } catch (e) {
-      print('Error saat toggle favorit: $e');
-      if (mounted) {
-        setState(() {
-          favoriteIds.contains(idwisata)
-              ? favoriteIds.remove(idwisata)
-              : favoriteIds.add(idwisata);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error jaringan saat memperbarui favorit.'), backgroundColor: Colors.red),
-        );
-      }
-    }
+    if (!mounted) return;
+    setState(() {
+      favoriteIds.contains(idwisata)
+          ? favoriteIds.remove(idwisata)
+          : favoriteIds.add(idwisata);
+    });
   }
 
   Widget buildHighlightImageSlider() {
@@ -183,16 +109,18 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: imageUrl != null && Uri.tryParse(imageUrl)?.hasAbsolutePath == true
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 50, color: Colors.red),
-                    )
-                  : Container(
-                      color: Colors.grey,
-                      child: const Icon(Icons.broken_image, size: 50, color: Colors.white),
-                    ),
+              child:
+                  imageUrl != null
+                      ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => const Icon(Icons.broken_image),
+                      )
+                      : Container(
+                        color: Colors.grey,
+                        child: const Icon(Icons.broken_image),
+                      ),
             ),
           );
         },
@@ -205,33 +133,23 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
     return Wrap(
       spacing: 10,
-      children: kategoriList.map((item) {
-        final isSelected = selectedKategoriId == item['idkategori'];
-        return ChoiceChip(
-          label: Text(item['namakategori']),
-          selected: isSelected,
-          onSelected: (_) {
-            if (mounted) {
-              setState(() {
-                selectedKategoriId = item['idkategori'];
-                _isLoadingWisata = true; 
-              });
-            }
-
-            fetchWisata(kategoriId: item['idkategori']).then((_) {
-              if (mounted) {
-                setState(() {
-                  _isLoadingWisata = false; 
-                });
-              }
-            });
-          },
-          selectedColor: Colors.teal,
-          labelStyle: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-          ),
-        );
-      }).toList(),
+      children:
+          kategoriList.map((item) {
+            final isSelected = selectedKategoriId == item['idkategori'];
+            return ChoiceChip(
+              label: Text(item['namakategori']),
+              selected: isSelected,
+              onSelected: (_) {
+                if (!mounted) return;
+                setState(() => selectedKategoriId = item['idkategori']);
+                fetchWisata(kategoriId: item['idkategori']);
+              },
+              selectedColor: Colors.teal,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            );
+          }).toList(),
     );
   }
 
@@ -248,22 +166,33 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: ListTile(
           contentPadding: const EdgeInsets.all(10),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => DetailWisataPage(wisata: wisata, userId: userId),
+              ),
+            );
+          },
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: imageUrl != null && Uri.tryParse(imageUrl)?.hasAbsolutePath == true
-                ? Image.network(
-                    imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40, color: Colors.red),
-                  )
-                : Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey,
-                    child: const Icon(Icons.broken_image, size: 40, color: Colors.white),
-                  ),
+            child:
+                imageUrl != null
+                    ? Image.network(
+                      imageUrl,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => const Icon(Icons.broken_image),
+                    )
+                    : Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey,
+                      child: const Icon(Icons.broken_image),
+                    ),
           ),
           title: Text(wisata['namawisata'] ?? '-'),
           subtitle: Text(wisata['namakategori'] ?? '-'),
@@ -295,50 +224,30 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   Widget buildHomeContent() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Selamat Datang, $username'), 
+        title: Text('Selamat Datang, $username'),
         backgroundColor: Colors.teal,
       ),
-      body: RefreshIndicator( 
-        onRefresh: _initiateDataFetching, 
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-          children: [
-            const Text(
-              "WISATA BATURADEN",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            if (_isLoadingKategori || _isLoadingWisata)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0), 
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start, 
-                children: [
-                  buildHighlightImageSlider(),
-                  const SizedBox(height: 16),
-                  buildKategori(),
-                  const SizedBox(height: 16),
-                  ...buildRekomendasiList(),
-                ],
-              ),
-          ],
-        ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+        children: [
+          const Text(
+            "WISATA BATURADEN",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          buildHighlightImageSlider(),
+          const SizedBox(height: 16),
+          buildKategori(),
+          const SizedBox(height: 16),
+          ...buildRekomendasiList(),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      buildHomeContent(),
-      cari.PencarianPage(), 
-      profil.Profil() 
-    ];
+    final pages = [buildHomeContent(), cari.PencarianPage(), profil.Profil()];
     return Scaffold(
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
