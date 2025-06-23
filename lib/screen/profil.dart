@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; 
 import 'package:jelajahbaturaden/login/login.dart';
 import 'package:jelajahbaturaden/screen/favorit.dart';
-import 'package:jelajahbaturaden/pengajuan/postinguser.dart'; // tambahkan import ini
+import 'package:jelajahbaturaden/pengajuan/postinguser.dart';
+import '../model/user_session.dart'; 
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -11,6 +13,19 @@ class Profil extends StatefulWidget {
 }
 
 class _ProfilState extends State<Profil> {
+  String _username = 'Nama Profil'; 
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userSession = Provider.of<UserSession>(context, listen: false);
+      setState(() {
+        _username = userSession.username ?? 'Nama Profil'; 
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,8 +44,8 @@ class _ProfilState extends State<Profil> {
             child: const Icon(Icons.person, size: 120, color: Colors.grey),
           ),
           const SizedBox(height: 16),
-          const Center(
-            child: Text('Nama Profil', style: TextStyle(fontSize: 16)),
+          Center(
+            child: Text(_username, style: TextStyle(fontSize: 16)),
           ),
           const SizedBox(height: 32),
           Container(
@@ -44,31 +59,33 @@ class _ProfilState extends State<Profil> {
                 MenuProfil(
                   icon: Icons.favorite_border,
                   label: 'Favorite',
-                  onTap:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => FavoritePage()),
-                      ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FavoritePage()),
+                  ),
                 ),
                 MenuProfil(
                   icon: Icons.format_list_bulleted,
                   label: 'Request Tempat Wisata',
-                  onTap:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FormrequestWisata(),
-                        ), // diarahkan ke postinguser.dart
-                      ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FormrequestWisata(),
+                    ),
+                  ),
                 ),
                 MenuProfil(
                   icon: Icons.logout,
                   label: 'Logout',
-                  onTap:
-                      () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => PageLogin()),
-                      ),
+                  onTap: () {
+                    final userSession = Provider.of<UserSession>(context, listen: false);
+                    userSession.clearSession();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => PageLogin()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
                 ),
               ],
             ),

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import 'reset.dart';
 import 'addpengguna.dart';
 import '../screen/halamanutama.dart';
 import '../screen/halamanadmin.dart';
 import '../konstanta.dart';
+import '../model/user_session.dart';
 
 class PageLogin extends StatefulWidget {
   const PageLogin({super.key});
@@ -19,7 +21,7 @@ class _PageLoginState extends State<PageLogin> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController loginController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   bool isLoading = false;
   bool showPassword = false;
 
@@ -56,6 +58,26 @@ class _PageLoginState extends State<PageLogin> {
         final role = result['role'] ?? 'user';
         final userData = result['data'];
 
+        int? idpenggunaInt;
+        if (userData['idpengguna'] != null) {
+          if (userData['idpengguna'] is String) {
+            idpenggunaInt = int.tryParse(userData['idpengguna']);
+          } else if (userData['idpengguna'] is int) {
+            idpenggunaInt = userData['idpengguna'];
+          }
+        }
+
+        if (idpenggunaInt == null) {
+          throw Exception('ID Pengguna tidak valid atau tidak ditemukan dari API.');
+        }
+
+        Provider.of<UserSession>(context, listen: false).setSession(
+          id: idpenggunaInt, 
+          name: userData['username'],
+          userRole: role,
+        );
+
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Login Berhasil!'),
@@ -65,10 +87,10 @@ class _PageLoginState extends State<PageLogin> {
 
         Navigator.pushReplacement(
           context,
-            MaterialPageRoute(
+          MaterialPageRoute(
             builder: (_) => role.toLowerCase() == 'admin'
-            ? HalamanAdmin(userData: userData)
-            : HalamanUtama(userData: userData),
+                ? HalamanAdmin()
+                : HalamanUtama(),
           ),
         );
       } else {
