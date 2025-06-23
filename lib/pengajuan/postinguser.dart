@@ -1,168 +1,197 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:jelajahbaturaden/konstanta.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class FormrequestWisata extends StatefulWidget {
+  // Konstruktor untuk menerima data userData
 
-class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Form Pengajuan Tempat',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(),
-        ),
-      ),
-      home: PengajuanFormPage(),
-    );
-  }
+  _FormrequestWisataState createState() => _FormrequestWisataState();
 }
 
-class PengajuanFormPage extends StatefulWidget {
-  @override
-  _PengajuanFormPageState createState() => _PengajuanFormPageState();
-}
+class _FormrequestWisataState extends State<FormrequestWisata> {
+  final TextEditingController namaController = TextEditingController();
+  final TextEditingController deskripsiController = TextEditingController();
+  final TextEditingController alamatController = TextEditingController();
+  String? selectedKategori;
+  File? selectedImage;
 
-class _PengajuanFormPageState extends State<PengajuanFormPage> {
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _deskripsiController = TextEditingController();
-  final TextEditingController _alamatController = TextEditingController();
-  String? _selectedKategori;
-
-  final ImagePicker _picker = ImagePicker();
-  XFile? _selectedImage;
-
-  final List<String> _kategoriList = [
-    'Wisata Alam',
-    'Budaya',
-    'Kuliner',
-    'Lainnya',
+  final List<Map<String, dynamic>> kategoriList = [
+    {'id': '1', 'label': 'Wisata Alam'},
+    {'id': '2', 'label': 'Budaya'},
+    {'id': '3', 'label': 'Kuliner'},
+    {'id': '4', 'label': 'Lainnya'},
   ];
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+  Future<void> pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) {
       setState(() {
-        _selectedImage = image;
+        selectedImage = File(picked.path);
       });
     }
   }
 
-  void _submitForm() {
-    if (_selectedImage == null ||
-        _namaController.text.isEmpty ||
-        _deskripsiController.text.isEmpty ||
-        _alamatController.text.isEmpty ||
-        _selectedKategori == null) {
+  Future<void> submitForm() async {
+    if (namaController.text.isEmpty ||
+        deskripsiController.text.isEmpty ||
+        alamatController.text.isEmpty ||
+        selectedKategori == null ||
+        selectedImage == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Mohon lengkapi semua data")));
+      ).showSnackBar(SnackBar(content: Text('Mohon lengkapi semua data')));
+      return;
+    }
+    if (selectedImage == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gambar harus dipilih!')));
       return;
     }
 
-    // Contoh log output
-    print("Nama: ${_namaController.text}");
-    print("Deskripsi: ${_deskripsiController.text}");
-    print("Alamat: ${_alamatController.text}");
-    print("Kategori: $_selectedKategori");
-    print("Gambar path: ${_selectedImage!.path}");
+    try {
+      // Pastikan baseUrl benar, misalnya: "http://your-api-url.com"
+      var uri = Uri.parse('$baseUrl pengajuan'); // Endpoint pengajuan
+      var request = http.MultipartRequest('POST', uri);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Pengajuan berhasil dikirim")));
+      // Mengirimkan idpengguna yang diambil dari userData (sementara '1' digunakan sebagai default)
+      request.fields['idpengguna'] =
+          '1'; // Pastikan idpengguna dikirim dengan benar
+      request.fields['namawisata'] = namaController.text;
+      request.fields['deskripsi'] = deskripsiController.text;
+      request.fields['alamat'] = alamatController.text;
+      request.fields['idkategori'] = selectedKategori!;
+
+      // Pastikan foto yang dipilih sudah ada dan dikirimkan dengan benar
+      request.files.add(
+        await http.MultipartFile.fromPath('foto', selectedImage!.path),
+      );
+
+      var response = await request.send();
+      final respStr = await response.stream.bytesToString();
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: $respStr');
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Data berhasil dikirim')));
+        clearForm();
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal: $respStr')));
+      }
+    } catch (e) {
+      print('ERROR: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+    }
+  }
+
+  void clearForm() {
+    namaController.clear();
+    deskripsiController.clear();
+    alamatController.clear();
+    setState(() {
+      selectedKategori = null;
+      selectedImage = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Pengajuan Tempat"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(16),
+      appBar: AppBar(title: Text('Request Wisata')),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child:
+                    selectedImage != null
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(selectedImage!, fit: BoxFit.cover),
+                        )
+                        : Center(child: Text('Upload Image')),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: namaController,
+              decoration: InputDecoration(labelText: 'Nama Tempat'),
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: deskripsiController,
+              decoration: InputDecoration(labelText: 'Deskripsi'),
+              maxLines: 2,
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: alamatController,
+              decoration: InputDecoration(labelText: 'Alamat'),
+            ),
+            SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: selectedKategori,
+              hint: Text('Kategori'),
+              onChanged: (value) => setState(() => selectedKategori = value),
+              items:
+                  kategoriList
+                      .map(
+                        (kategori) => DropdownMenuItem<String>(
+                          value: kategori['id'],
+                          child: Text(kategori['label']),
+                        ),
+                      )
+                      .toList(),
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: submitForm,
+                    child: Text('Request'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: StadiumBorder(),
+                    ),
                   ),
-                  child:
-                      _selectedImage != null
-                          ? ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              File(_selectedImage!.path),
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                          )
-                          : Center(child: Text("Upload Image")),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _namaController,
-                decoration: InputDecoration(labelText: "Nama Tempat"),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: _deskripsiController,
-                maxLines: 2,
-                decoration: InputDecoration(labelText: "Deskripsi"),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: _alamatController,
-                decoration: InputDecoration(labelText: "Alamat"),
-              ),
-              SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedKategori,
-                hint: Text("Kategori"),
-                items:
-                    _kategoriList.map((String kategori) {
-                      return DropdownMenuItem<String>(
-                        value: kategori,
-                        child: Text(kategori),
-                      );
-                    }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedKategori = value;
-                  });
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text("Request"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: StadiumBorder(),
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
+                SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: clearForm,
+                    child: Text('Clear'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: StadiumBorder(),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
