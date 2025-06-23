@@ -45,7 +45,7 @@ class _FormPostingWisataState extends State<FormPostingWisata> {
     }
 
     try {
-      var uri = Uri.parse('$baseUrl/wisata');
+      var uri = Uri.parse('$baseUrl wisata');
       var request = http.MultipartRequest('POST', uri);
 
       request.fields['namawisata'] = namaController.text;
@@ -56,7 +56,7 @@ class _FormPostingWisataState extends State<FormPostingWisata> {
         await http.MultipartFile.fromPath('foto', selectedImage!.path),
       );
 
-      print('Mengirim data ke $baseUrl/wisata...');
+      print('Mengirim data ke $baseUrl wisata...');
       print('Path Gambar: ${selectedImage!.path}');
       print('Kategori ID: $selectedKategori');
 
