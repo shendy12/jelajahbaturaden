@@ -112,7 +112,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     }
   }
 
-  Future<void> toggleFavorit(int idwisata) async {
+  Future<void> toggleFavorite(int idwisata) async {
+    final uri = Uri.parse('${baseUrl}toggleFavorite');
+
+    // Optimistically toggle favorite state
     if (mounted) {
       setState(() {
         favoriteIds.contains(idwisata)
@@ -121,13 +124,12 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       });
     }
 
-    final uri = Uri.parse('$baseUrl/wisata/toggle-favorit');
     try {
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'idpengguna': userId, 
+          'idpengguna': userId,
           'idwisata': idwisata,
           'action': favoriteIds.contains(idwisata) ? 'add' : 'remove',
         }),
@@ -142,7 +144,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                 : favoriteIds.add(idwisata);
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal memperbarui favorit.'), backgroundColor: Colors.red),
+            const SnackBar(
+              content: Text('Gagal memperbarui favorit.'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       } else {
@@ -157,7 +162,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
               : favoriteIds.add(idwisata);
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error jaringan saat memperbarui favorit.'), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('Error jaringan saat memperbarui favorit.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -271,7 +279,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             mainAxisSize: MainAxisSize.min,
             children: [
               GestureDetector(
-                onTap: () => toggleFavorit(id),
+                onTap: () => toggleFavorite(int.parse(id.toString())),
                 child: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: isFavorite ? Colors.red : Colors.grey,
