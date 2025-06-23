@@ -21,12 +21,17 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   Set<int> favoriteIds = {};
   final PageController _pageController = PageController(viewportFraction: 0.9);
 
-  int? get userId => widget.userData?['idpengguna'];
+  // Ambil userId dari userData di dalam initState()
+  late int userId;
   String get username => widget.userData?['username'] ?? 'Pengguna';
 
   @override
   void initState() {
     super.initState();
+    // Pastikan userId diinisialisasi dengan benar
+    userId =
+        widget.userData?['idpengguna'] ??
+        0; // Menetapkan default jika tidak ditemukan
     fetchKategori();
     fetchWisata();
   }

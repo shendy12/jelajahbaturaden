@@ -57,7 +57,7 @@ class _ProfilState extends State<Profil> {
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PengajuanFormPage(),
+                          builder: (context) => FormrequestWisata(),
                         ), // diarahkan ke postinguser.dart
                       ),
                 ),
