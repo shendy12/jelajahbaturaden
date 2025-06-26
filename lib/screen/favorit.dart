@@ -56,67 +56,80 @@ class _FavoritePageState extends State<FavoritePage> {
         title: const Text("Favorit Saya"),
         backgroundColor: Colors.teal,
       ),
-      body: favorites == null
-          ? const Center(child: CircularProgressIndicator())
-          : FutureBuilder<List<WisataFavorite>>(
-              future: favorites,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text(snapshot.error.toString()));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("Belum ada wisata favorit."));
-                }
-
-                final items = snapshot.data!;
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisExtent: 220,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final wisata = items[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                      ),
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                            child: Image.network(
-                              wisata.foto,
-                              height: 120,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.broken_image, size: 50),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            wisata.namawisata,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            wisata.namakategori,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
+      body:
+          favorites == null
+              ? const Center(child: CircularProgressIndicator())
+              : FutureBuilder<List<WisataFavorite>>(
+                future: favorites,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text(snapshot.error.toString()));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text("Belum ada wisata favorit."),
                     );
-                  },
-                );
-              },
-            ),
+                  }
+
+                  final items = snapshot.data!;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisExtent: 220,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final wisata = items[index];
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 4),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                              child: Image.network(
+                                wisata.foto,
+                                height: 120,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (_, __, ___) => const Icon(
+                                      Icons.broken_image,
+                                      size: 50,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              wisata.namawisata,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              wisata.namakategori,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
     );
   }
 }
