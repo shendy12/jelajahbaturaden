@@ -144,7 +144,7 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => Pengajuanadmin()));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => PengajuanAdminPage()));
 
                   },
                   child: const Text('Kelola Request Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
