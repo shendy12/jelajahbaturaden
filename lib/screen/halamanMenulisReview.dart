@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:jelajahbaturaden/konstanta.dart';
-
-// Ganti sesuai baseUrl API kamu
+import 'package:provider/provider.dart';
+import 'package:jelajahbaturaden/model/user_session.dart';
 
 class ReviewPage extends StatefulWidget {
   final int idWisata;
   final String namaWisata;
-  final int userId; // id_pengguna yang sedang login
+  final int? userId;
 
   const ReviewPage({
     required this.idWisata,
     required this.namaWisata,
-    required this.userId,
+    this.userId,
     Key? key,
   }) : super(key: key);
 
@@ -26,11 +26,18 @@ class _ReviewPageState extends State<ReviewPage> {
   double _currentRating = 0;
   final TextEditingController _ulasanController = TextEditingController();
   List<dynamic> _reviews = [];
+  late int userId;
 
   @override
   void initState() {
     super.initState();
-    _fetchUlasan();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Ambil userId dari constructor jika ada, atau dari UserSession jika tidak ada
+      userId =
+          widget.userId ??
+          Provider.of<UserSession>(context, listen: false).userId!;
+      _fetchUlasan();
+    });
   }
 
   Future<void> _fetchUlasan() async {
@@ -55,6 +62,7 @@ class _ReviewPageState extends State<ReviewPage> {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'idwisata': widget.idWisata,
+        'id_pengguna': userId,
         'review': _ulasanController.text.trim(),
         'rating': _currentRating.toInt(),
       }),
@@ -67,7 +75,7 @@ class _ReviewPageState extends State<ReviewPage> {
       });
       _fetchUlasan();
     } else {
-      print('Gagal mengirim ulasan');
+      print('Gagal mengirim ulasan: ${response.body}');
     }
   }
 
@@ -82,7 +90,7 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Widget _buildUlasanCard(Map review) {
-    final bool isMine = review['id_pengguna'] == widget.userId;
+    final bool isMine = review['id_pengguna'] == userId;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -108,7 +116,7 @@ class _ReviewPageState extends State<ReviewPage> {
                 const SizedBox(height: 6),
                 Row(
                   children: List.generate(
-                    review['rating'],
+                    int.tryParse(review['rating'].toString()) ?? 0,
                     (_) =>
                         const Icon(Icons.star, size: 16, color: Colors.amber),
                   ),
@@ -179,7 +187,7 @@ class _ReviewPageState extends State<ReviewPage> {
             TextField(
               controller: _ulasanController,
               decoration: InputDecoration(
-                hintText: 'tulis ulasan',
+                hintText: 'Tulis ulasan...',
                 contentPadding: const EdgeInsets.all(12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -199,7 +207,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('beri ulasan', style: TextStyle(fontSize: 16)),
+              child: const Text('Kirim Ulasan', style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 12),
             const Divider(),
