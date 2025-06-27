@@ -14,9 +14,6 @@ class PengajuanAdminPage extends StatefulWidget {
 
 class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
   late Future<List<Pengajuan>> _futurePengajuan;
-  List<Pengajuan> _allPengajuan = [];
-  List<Pengajuan> _filteredPengajuan = [];
-  final TextEditingController _searchController = TextEditingController();
 
   // --- LOGIKA ApiService DIMASUKKAN KE SINI ---
   Future<List<Pengajuan>> fetchPengajuanList() async {
@@ -34,45 +31,16 @@ class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
   void initState() {
     super.initState();
     _loadPengajuan();
-    _searchController.addListener(_filterPengajuan);
   }
 
   void _loadPengajuan() {
     setState(() {
       _futurePengajuan = fetchPengajuanList();
-      _futurePengajuan.then((data) {
-        setState(() {
-          _allPengajuan = data;
-          _filteredPengajuan = data;
-        });
-      }).catchError((error) {
-        // Handle error jika fetch gagal
-        setState(() {
-          _allPengajuan = [];
-          _filteredPengajuan = [];
-        });
-      });
     });
   }
   
-  void _filterPengajuan() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredPengajuan = _allPengajuan.where((item) {
-        return item.namawisata.toLowerCase().contains(query);
-      }).toList();
-    });
-  }
-
   Future<void> _refresh() async {
-    _searchController.clear();
     _loadPengajuan();
-  }
-  
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -88,23 +56,6 @@ class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
           Expanded(
             child: FutureBuilder<List<Pengajuan>>(
               future: _futurePengajuan,
@@ -117,12 +68,15 @@ class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
                   return const Center(child: Text('Tidak ada request wisata.'));
                 }
 
+                // Langsung gunakan snapshot.data
+                final pengajuanList = snapshot.data!;
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView.builder(
-                    itemCount: _filteredPengajuan.length,
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: pengajuanList.length,
                     itemBuilder: (context, index) {
-                      final item = _filteredPengajuan[index];
+                      final item = pengajuanList[index];
                       return _buildPengajuanCard(item);
                     },
                   ),
@@ -169,7 +123,7 @@ class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -233,3 +187,4 @@ class _PengajuanAdminPageState extends State<PengajuanAdminPage> {
     );
   }
 }
+

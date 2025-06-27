@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:jelajahbaturaden/pengajuan/pengajuanadmin.dart';
 import 'package:jelajahbaturaden/pengajuan/postingadmin.dart';
-import 'package:jelajahbaturaden/screen/editdeleteadmin.dart';
+import 'package:jelajahbaturaden/screen/listadmin.dart';
 import 'package:provider/provider.dart'; 
 import '../login/addadmin.dart';
 import 'package:jelajahbaturaden/login/login.dart';
@@ -126,7 +126,7 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) =>EditDeleteAdminPage())
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => WisataListPage())
                     );
                   },
                   child: const Text('Edit Data Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
