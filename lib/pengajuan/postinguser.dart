@@ -4,12 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:jelajahbaturaden/konstanta.dart';
 
-class FormrequestWisata extends StatefulWidget {
+class PostingUser extends StatefulWidget {
   @override
-  _FormrequestWisataState createState() => _FormrequestWisataState();
+  _PostingUserState createState() => _PostingUserState();
 }
 
-class _FormrequestWisataState extends State<FormrequestWisata> {
+class _PostingUserState extends State<PostingUser> {
   final TextEditingController namaController = TextEditingController();
   final TextEditingController deskripsiController = TextEditingController();
   final TextEditingController alamatController = TextEditingController();
@@ -45,10 +45,10 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
     }
 
     try {
-      var uri = Uri.parse('$baseUrl/pengajuan'); // <- PERBAIKAN PENTING
+      var uri = Uri.parse('$baseUrl/pengajuan');
       var request = http.MultipartRequest('POST', uri);
 
-      // Gantilah idpengguna ini dengan userId sesungguhnya dari session jika perlu
+      // Gantilah nilai idpengguna di sini dengan nilai asli dari login nanti
       request.fields['idpengguna'] = '1';
       request.fields['namawisata'] = namaController.text;
       request.fields['deskripsi'] = deskripsiController.text;
@@ -95,7 +95,7 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Request Wisata')),
+      appBar: AppBar(title: const Text('Ajukan Wisata')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -115,7 +115,7 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
                           borderRadius: BorderRadius.circular(16),
                           child: Image.file(selectedImage!, fit: BoxFit.cover),
                         )
-                        : const Center(child: Text('Upload Image')),
+                        : const Center(child: Text('Upload Gambar')),
               ),
             ),
             const SizedBox(height: 16),
@@ -137,7 +137,7 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: selectedKategori,
-              hint: const Text('Kategori'),
+              hint: const Text('Pilih Kategori'),
               onChanged: (value) => setState(() => selectedKategori = value),
               items:
                   kategoriList
@@ -155,7 +155,7 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: submitForm,
-                    child: const Text('Request'),
+                    child: const Text('Kirim'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
