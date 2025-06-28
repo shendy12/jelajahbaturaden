@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:jelajahbaturaden/konstanta.dart';
 
 class FormrequestWisata extends StatefulWidget {
-  // Konstruktor untuk menerima data userData
-
   @override
   _FormrequestWisataState createState() => _FormrequestWisataState();
 }
@@ -40,32 +38,22 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
         alamatController.text.isEmpty ||
         selectedKategori == null ||
         selectedImage == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Mohon lengkapi semua data')));
-      return;
-    }
-    if (selectedImage == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gambar harus dipilih!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mohon lengkapi semua data')),
+      );
       return;
     }
 
     try {
-      // Pastikan baseUrl benar, misalnya: "http://your-api-url.com"
-      var uri = Uri.parse('$baseUrl pengajuan'); // Endpoint pengajuan
+      var uri = Uri.parse('$baseUrl/pengajuan'); // <- PERBAIKAN PENTING
       var request = http.MultipartRequest('POST', uri);
 
-      // Mengirimkan idpengguna yang diambil dari userData (sementara '1' digunakan sebagai default)
-      request.fields['idpengguna'] =
-          '1'; // Pastikan idpengguna dikirim dengan benar
+      // Gantilah idpengguna ini dengan userId sesungguhnya dari session jika perlu
+      request.fields['idpengguna'] = '1';
       request.fields['namawisata'] = namaController.text;
       request.fields['deskripsi'] = deskripsiController.text;
       request.fields['alamat'] = alamatController.text;
       request.fields['idkategori'] = selectedKategori!;
-
-      // Pastikan foto yang dipilih sudah ada dan dikirimkan dengan benar
       request.files.add(
         await http.MultipartFile.fromPath('foto', selectedImage!.path),
       );
@@ -76,10 +64,10 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
       print('Status Code: ${response.statusCode}');
       print('Response Body: $respStr');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Data berhasil dikirim')));
+        ).showSnackBar(const SnackBar(content: Text('Data berhasil dikirim')));
         clearForm();
       } else {
         ScaffoldMessenger.of(
@@ -107,9 +95,9 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Request Wisata')),
+      appBar: AppBar(title: const Text('Request Wisata')),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             GestureDetector(
@@ -127,29 +115,29 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
                           borderRadius: BorderRadius.circular(16),
                           child: Image.file(selectedImage!, fit: BoxFit.cover),
                         )
-                        : Center(child: Text('Upload Image')),
+                        : const Center(child: Text('Upload Image')),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: namaController,
-              decoration: InputDecoration(labelText: 'Nama Tempat'),
+              decoration: const InputDecoration(labelText: 'Nama Tempat'),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             TextField(
               controller: deskripsiController,
-              decoration: InputDecoration(labelText: 'Deskripsi'),
+              decoration: const InputDecoration(labelText: 'Deskripsi'),
               maxLines: 2,
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             TextField(
               controller: alamatController,
-              decoration: InputDecoration(labelText: 'Alamat'),
+              decoration: const InputDecoration(labelText: 'Alamat'),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: selectedKategori,
-              hint: Text('Kategori'),
+              hint: const Text('Kategori'),
               onChanged: (value) => setState(() => selectedKategori = value),
               items:
                   kategoriList
@@ -161,31 +149,31 @@ class _FormrequestWisataState extends State<FormrequestWisata> {
                       )
                       .toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
                     onPressed: submitForm,
-                    child: Text('Request'),
+                    child: const Text('Request'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const StadiumBorder(),
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: clearForm,
-                    child: Text('Clear'),
+                    child: const Text('Clear'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: const StadiumBorder(),
                     ),
                   ),
                 ),
