@@ -1,125 +1,157 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class EditPage extends StatelessWidget {
-  const EditPage({super.key});
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:image_picker/image_picker.dart';
+
+class EditPage extends StatefulWidget {
+  final dynamic wisata;
+
+  const EditPage({super.key, required this.wisata});
+
+  @override
+  State<EditPage> createState() => _EditPageState();
+}
+
+class _EditPageState extends State<EditPage> {
+  late TextEditingController idController;
+  late TextEditingController namaController;
+  late TextEditingController deskripsiController;
+  late TextEditingController alamatController;
+  String? selectedKategori;
+  File? selectedImage;
+  final List<String> kategoriList = ['Pantai', 'Gunung', 'Museum', 'Taman'];
+
+  @override
+  void initState() {
+    super.initState();
+    idController = TextEditingController(
+      text: widget.wisata['idwisata'].toString(),
+    );
+    namaController = TextEditingController(text: widget.wisata['namawisata']);
+    deskripsiController = TextEditingController(
+      text: widget.wisata['deskripsi'],
+    );
+    alamatController = TextEditingController(text: widget.wisata['alamat']);
+    selectedKategori =
+        kategoriList.contains(widget.wisata['namakategori'])
+            ? widget.wisata['namakategori']
+            : null;
+    print(selectedKategori);
+  }
+
+  Future<void> updateWisata() async {
+    var uri = Uri.parse(
+      'https://ac91-175-158-55-121.ngrok-free.app/wisataedit/${widget.wisata['idwisata']}',
+    );
+
+    var request = http.MultipartRequest('PUT', uri);
+    request.fields['namawisata'] = namaController.text;
+    request.fields['deskripsi'] = deskripsiController.text;
+    request.fields['alamat'] = alamatController.text;
+    request.fields['namakategori'] = selectedKategori ?? '';
+
+    if (selectedImage != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('foto', selectedImage!.path),
+      );
+    }
+
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    print('Status: ${response.statusCode}');
+    print('Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Berhasil memperbarui data')));
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal memperbarui data')));
+    }
+  }
+
+  Future<void> pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        selectedImage = File(picked.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.arrow_back, size: 20),
-                    SizedBox(width: 5),
-                    Text(
-                      'Back',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+      appBar: AppBar(title: Text("Edit Wisata")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            TextField(
+              controller: idController,
+              decoration: InputDecoration(labelText: 'ID Tempat'),
+              enabled: false,
+            ),
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Center(
-                child: Text(
-                  'Edit',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'ID Tempat',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Nama Tempat',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Deskripsi',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Alamat',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Kategori',
-                  border: OutlineInputBorder(),
-                ),
-                items:
-                    ['Pantai', 'Gunung', 'Museum', 'Taman']
-                        .map(
-                          (kategori) => DropdownMenuItem(
-                            value: kategori,
-                            child: Text(kategori),
-                          ),
+                child:
+                    selectedImage != null
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(selectedImage!, fit: BoxFit.cover),
                         )
-                        .toList(),
-                onChanged: (value) {},
+                        : Center(child: Text('Upload Image')),
               ),
-              const SizedBox(height: 30),
-
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 15,
-                    ),
-                  ),
-                  child: const Text(
-                    'Posting',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: namaController,
+              decoration: InputDecoration(labelText: 'Nama Tempat'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: deskripsiController,
+              decoration: InputDecoration(labelText: 'Deskripsi'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: alamatController,
+              decoration: InputDecoration(labelText: 'Alamat'),
+            ),
+            SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: selectedKategori,
+              decoration: InputDecoration(labelText: 'Kategori'),
+              items:
+                  kategoriList.map((kategori) {
+                    return DropdownMenuItem<String>(
+                      value: kategori,
+                      child: Text(kategori),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedKategori = value!;
+                });
+              },
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(onPressed: updateWisata, child: Text('Posting')),
+          ],
         ),
       ),
     );

@@ -1,22 +1,22 @@
-
 import 'package:flutter/material.dart';
 import 'package:jelajahbaturaden/pengajuan/pengajuanadmin.dart';
 import 'package:jelajahbaturaden/pengajuan/postingadmin.dart';
-import 'package:jelajahbaturaden/screen/listadmin.dart';
-import 'package:provider/provider.dart'; 
+import 'package:jelajahbaturaden/screen/listwisata.dart';
+import 'package:provider/provider.dart';
 import '../login/addadmin.dart';
 import 'package:jelajahbaturaden/login/login.dart';
-import '../model/user_session.dart'; 
+import '../model/user_session.dart';
+
 class HalamanAdmin extends StatefulWidget {
   const HalamanAdmin({Key? key}) : super(key: key);
   @override
   _HalamanAdminState createState() => _HalamanAdminState();
 }
-class _HalamanAdminState extends State<HalamanAdmin> {
 
-  String _adminUsername = 'username'; 
-  int _adminId = 0; 
-  String _adminRole = 'Admin'; 
+class _HalamanAdminState extends State<HalamanAdmin> {
+  String _adminUsername = 'username';
+  int _adminId = 0;
+  String _adminRole = 'Admin';
 
   @override
   void initState() {
@@ -39,9 +39,12 @@ class _HalamanAdminState extends State<HalamanAdmin> {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.logout, color: Colors.black), 
+          icon: const Icon(Icons.logout, color: Colors.black),
           onPressed: () {
-            final userSession = Provider.of<UserSession>(context, listen: false);
+            final userSession = Provider.of<UserSession>(
+              context,
+              listen: false,
+            );
             userSession.clearSession();
             Navigator.pushAndRemoveUntil(
               context,
@@ -58,7 +61,10 @@ class _HalamanAdminState extends State<HalamanAdmin> {
           IconButton(
             icon: const Icon(Icons.person_add, color: Colors.black),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => Addadmin()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => Addadmin()),
+              );
             },
           ),
         ],
@@ -71,29 +77,30 @@ class _HalamanAdminState extends State<HalamanAdmin> {
             children: [
               ClipOval(
                 child: Image.asset(
-                  'lib/assets/images/admin.png', 
+                  'lib/assets/images/admin.png',
                   width: 150,
                   height: 150,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.person_pin, size: 150, color: Colors.grey); // Fallback icon
+                    return const Icon(
+                      Icons.person_pin,
+                      size: 150,
+                      color: Colors.grey,
+                    ); // Fallback icon
                   },
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                _adminUsername, // Menampilkan username 
+                _adminUsername, // Menampilkan username
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Administrator (ID: $_adminId)', // Menampilkan ID 
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                'Administrator (ID: $_adminId)', // Menampilkan ID
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 40),
 
@@ -108,28 +115,15 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => FormPostingWisata())
-
-                    );                  },
-                  child: const Text('Posting / Manajemen Konten', style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D9488),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => WisataListPage())
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => FormPostingWisata()),
                     );
                   },
-                  child: const Text('Edit Data Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text(
+                    'Posting / Manajemen Konten',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -144,10 +138,38 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => PengajuanAdminPage()));
-
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => WisataListPage()),
+                    );
                   },
-                  child: const Text('Kelola Request Wisata', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text(
+                    'Edit Data Wisata',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0D9488),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => PengajuanAdminPage()),
+                    );
+                  },
+                  child: const Text(
+                    'Kelola Request Wisata',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -162,9 +184,18 @@ class _HalamanAdminState extends State<HalamanAdmin> {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => Addadmin()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => Addadmin()),
+                    );
                   },
-                  child: Text('Tambah Akun Admin Baru', style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Tambah Akun Admin Baru',
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
