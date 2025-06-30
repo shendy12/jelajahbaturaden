@@ -38,7 +38,6 @@ class EditPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
