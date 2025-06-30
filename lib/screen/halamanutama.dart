@@ -6,7 +6,7 @@ import 'package:jelajahbaturaden/konstanta.dart';
 import 'profil.dart' as profil;
 import 'pencarian.dart' as cari;
 import '../model/user_session.dart';
-import 'detail_wisata.dart'; // <- pastikan file ini ada
+import 'detail_wisata.dart';
 
 class HalamanUtama extends StatefulWidget {
   const HalamanUtama({super.key});
@@ -185,19 +185,12 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                         imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder:
-                            (_, __, ___) => const Icon(
-                              Icons.broken_image,
-                              size: 50,
-                              color: Colors.red,
-                            ),
+                            (_, __, ___) =>
+                                const Icon(Icons.broken_image, size: 50),
                       )
                       : Container(
                         color: Colors.grey,
-                        child: const Icon(
-                          Icons.broken_image,
-                          size: 50,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.broken_image, size: 50),
                       ),
             ),
           );
@@ -207,35 +200,54 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   }
 
   Widget buildKategori() {
-    if (kategoriList.isEmpty) return const Text("Kategori belum tersedia");
+    if (_isLoadingKategori) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (kategoriList.isEmpty) {
+      return const Text("Kategori belum tersedia");
+    }
 
     return Wrap(
       spacing: 10,
+      runSpacing: 8,
       children:
           kategoriList.map((item) {
-            final isSelected = selectedKategoriId == item['idkategori'];
+            final int idKategori =
+                int.tryParse(item['idkategori'].toString()) ?? 0;
+            final bool isSelected = selectedKategoriId == idKategori;
+
             return ChoiceChip(
-              label: Text(item['namakategori']),
+              label: Text(item['namakategori'] ?? 'Kategori'),
               selected: isSelected,
               onSelected: (_) {
                 if (mounted) {
                   setState(() {
-                    selectedKategoriId = item['idkategori'];
                     _isLoadingWisata = true;
+
+                    if (selectedKategoriId == idKategori) {
+                      selectedKategoriId = null;
+                      fetchWisata().then((_) {
+                        if (mounted) {
+                          setState(() => _isLoadingWisata = false);
+                        }
+                      });
+                    } else {
+                      selectedKategoriId = idKategori;
+                      fetchWisata(kategoriId: selectedKategoriId).then((_) {
+                        if (mounted) {
+                          setState(() => _isLoadingWisata = false);
+                        }
+                      });
+                    }
                   });
                 }
-
-                fetchWisata(kategoriId: item['idkategori']).then((_) {
-                  if (mounted) {
-                    setState(() {
-                      _isLoadingWisata = false;
-                    });
-                  }
-                });
               },
               selectedColor: Colors.teal,
+              backgroundColor: Colors.grey[200],
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500,
               ),
             );
           }).toList(),
@@ -246,7 +258,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     if (wisataList.isEmpty) return [const Text("Wisata tidak ditemukan.")];
 
     return wisataList.map<Widget>((wisata) {
-      final id = wisata['idwisata'];
+      final id = int.tryParse(wisata['idwisata'].toString()) ?? 0;
       final isFavorite = favoriteIds.contains(id);
       final imageUrl = wisata['foto'];
 
@@ -276,21 +288,14 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                         height: 60,
                         fit: BoxFit.cover,
                         errorBuilder:
-                            (_, __, ___) => const Icon(
-                              Icons.broken_image,
-                              size: 40,
-                              color: Colors.red,
-                            ),
+                            (_, __, ___) =>
+                                const Icon(Icons.broken_image, size: 40),
                       )
                       : Container(
                         width: 60,
                         height: 60,
                         color: Colors.grey,
-                        child: const Icon(
-                          Icons.broken_image,
-                          size: 40,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.broken_image, size: 40),
                       ),
             ),
             title: Text(wisata['namawisata'] ?? '-'),
@@ -299,7 +304,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
-                  onTap: () => toggleFavorite(int.parse(id.toString())),
+                  onTap: () => toggleFavorite(id),
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: isFavorite ? Colors.red : Colors.grey,

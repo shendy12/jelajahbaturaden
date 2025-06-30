@@ -1,15 +1,14 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; 
-import 'package:jelajahbaturaden/login/login.dart'; 
-import 'package:jelajahbaturaden/screen/halamanutama.dart'; 
-import 'package:jelajahbaturaden/model/user_session.dart'; 
+import 'package:provider/provider.dart';
+import 'package:jelajahbaturaden/login/login.dart';
+import 'package:jelajahbaturaden/screen/halamanutama.dart';
+import 'package:jelajahbaturaden/model/user_session.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => UserSession(), 
-      child: const MyApp(), 
+      create: (context) => UserSession(),
+      child: const MyApp(),
     ),
   );
 }
