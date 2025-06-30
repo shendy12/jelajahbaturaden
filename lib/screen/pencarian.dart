@@ -149,6 +149,8 @@ class _PencarianPageState extends State<PencarianPage> {
           ],
         ),
         onTap: () {
+          wisata['foto'] = imageUrl;
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -179,7 +181,7 @@ class _PencarianPageState extends State<PencarianPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("pencarian", style: TextStyle(color: Colors.black)),
+        title: const Text("Pencarian", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
